@@ -121,7 +121,7 @@ char** arg_parse(char* line){
   int acount = numargs;
   while (linelen > lcount){
     //only interested in args
-    while (isalnum(line[lcount])){
+    while (!isblank(line[lcount])){
       if (first){
 	args[numargs - acount] = &line[lcount];
 	first = false;
@@ -141,9 +141,11 @@ int countargs(char* line){
   char* count = line;
   int ix = 0;
   int numargs = 0;
-  while(count[ix] != '\0'){
+  while(ix < linelen){
+
     //loop through whitespace
-    while(!isalnum(count[ix])){
+    while(isblank(count[ix])){
+
       ix++;
     }
     //first letter if not NULL
@@ -151,10 +153,12 @@ int countargs(char* line){
       numargs++;
     }
     //loop through arg
-    while(isalnum(count[ix])){
+    while(!isblank(count[ix])){
       ix++;
     }
+
   }
+
   return numargs;
 }
 
