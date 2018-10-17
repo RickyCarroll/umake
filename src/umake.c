@@ -4,19 +4,15 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <stdbool.h>
+
+#include "arg_parse.h"
 
 /* CONSTANTS */
 
 /* PROTOTYPES */
 
 /* GLOBALS */
-ssize_t linelen;
+
 
 /* Process Line
  * line   The command line to execute.
@@ -24,19 +20,6 @@ ssize_t linelen;
  * process to execute the line and waits for that process to complete. 
  */
 void   processline(char* line);
-
-/* Arg parse
- * line   The command line to process
- */
-
-char** arg_parse(char* line);
-
-
-/* Count args
- * line   The command line count number of args
- * This function counts the number of arguments in the line.
- */
-int    countargs(char* line);
 
 /* Main entry point.
  * argc    A count of command-line arguments 
@@ -110,55 +93,5 @@ void processline (char* line) {
     break;
   }
   }
-}
-
-char** arg_parse(char* line){
-  int numargs = countargs(line) + 1;
-  char** args = malloc(numargs*sizeof(char*));
-  
-  bool first = true;
-  int lcount = 0;
-  int acount = numargs;
-  while (linelen > lcount){
-    //only interested in args
-    while (!isblank(line[lcount])){
-      if (first){
-	args[numargs - acount] = &line[lcount];
-	first = false;
-	acount--;
-      }
-      lcount++;
-    }
-    //replace whitespace with null char
-    line[lcount] = '\0';
-    lcount++;
-    first = true;
-  }
-  return args;
-}
-
-int countargs(char* line){  
-  char* count = line;
-  int ix = 0;
-  int numargs = 0;
-  while(ix < linelen){
-
-    //loop through whitespace
-    while(isblank(count[ix])){
-
-      ix++;
-    }
-    //first letter if not NULL
-    if (count[ix] != '\0'){
-      numargs++;
-    }
-    //loop through arg
-    while(!isblank(count[ix])){
-      ix++;
-    }
-
-  }
-
-  return numargs;
 }
 
