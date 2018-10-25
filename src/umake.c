@@ -59,22 +59,24 @@ int main(int argc, const char* argv[]) {
  * 
  */
 void processline (char* line) {
-
-  char** args = arg_parse(line);
+  int argcp = 0;
+  char** args = arg_parse(line, &argcp);
+  if (argcp == 1){
+    free (args);
+    return;
+  }
   const pid_t cpid = fork();
   switch(cpid) {
     
   case -1: {
     perror("fork");
+    free(args);
     break;
   }
     
   case 0: {
     
     execvp(args[0], args);
-    /*
-      execlp(line, line, (char*)(0));
-    */
     perror("execvp");
     exit(EXIT_FAILURE);
     break;
@@ -90,6 +92,7 @@ void processline (char* line) {
       fprintf(stderr, "wait: expected process %d, but waited for process %d",
               cpid, pid);
     }
+    free(args);
     break;
   }
   }

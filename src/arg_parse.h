@@ -9,7 +9,7 @@
  * line   The command line to process
  */
 
-char** arg_parse(char* line);
+char** arg_parse(char* line, int* argcp);
 
 
 ssize_t linelen;
