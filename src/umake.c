@@ -28,6 +28,10 @@
  */
 void   processline(char* line);
 
+/* Handle Targets
+ * nhead - head of the node list
+ * This function finds the targets in the list and sends their rules to processline
+ */
 
 void handleTargets(int argc, const char** argv, node* nhead);
 
