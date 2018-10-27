@@ -1,5 +1,8 @@
-	pwd
-	ls
-	pwd
-	who
-
+A:
+	echo Rules for A
+	echo Rules for A
+B: A
+	echo Rules for B
+C: A B
+	echo Rules for C
+	echo Rules for C

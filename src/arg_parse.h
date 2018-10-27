@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <string.h>
 
 /* Arg parse
  * line   The command line to process
