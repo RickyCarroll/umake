@@ -1,8 +1,20 @@
-A:
-	echo Rules for A
-	echo Rules for A
-B: A
-	echo Rules for B
-C: A B
-	echo Rules for C
-	echo Rules for C
+umake: umake.o arg_parse.o target.o
+	gcc -g -Wall -o umake umake.o arg_parse.o target.o
+
+arg_parse.o: arg_parse.c arg_parse.h
+	gcc -g -c arg_parse.c
+
+umake.o: umake.c arg_parse.h target.h
+	gcc -g -c umake.c
+
+target.o: target.c target.h
+	gcc -g -c target.c
+
+clean:
+	rm *.o *~ umake
+
+install:
+	cp -p umake ${HOME}/bin/umake
+
+who:
+	echo The user is {${USER}}.

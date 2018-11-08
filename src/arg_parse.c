@@ -10,9 +10,9 @@ char** arg_parse(char* line, int* argcp){
   *argcp = countargs(line)+1;
   char** args = malloc((*argcp)*sizeof(char*));
   bool first = true;
-  int linelen = strlen(line);
   int lcount = 0;
   int acount = 0;
+  int linelen = strlen(line);
   while (linelen > lcount){
     if (!isspace(line[lcount])){
       if (first){
@@ -37,6 +37,7 @@ static int countargs(char* line){
   int ix = 0;
   int numargs = 0;
   int begword = 1;
+  int linelen = strlen(line);
   while(ix < linelen || count[ix] != '\0'){
     if(isspace(count[ix])){
       begword = 1;

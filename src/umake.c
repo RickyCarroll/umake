@@ -3,13 +3,6 @@
  * 09 AUG 2017, Aran Clauson
  */
 
-/*
-  if (argcp == 1){
-    free (args);
-    return;
-  }
-*/
-
 
 
 #include "arg_parse.h"
@@ -35,6 +28,19 @@ void   processline(char* line);
 
 void handleTargets(int argc, const char** argv, node* nhead);
 
+/* Expand
+ * orig    The input string that may contain variables to be expanded
+ * new     An output buffer that will contain a copy of orig with all 
+ *         variables expanded
+ * newsize The size of the buffer pointed to by new.
+ * returns 1 upon success or 0 upon failure. 
+ *
+ * Example: "Hello, ${PLACE}" will expand to "Hello, World" when the environment
+ * variable PLACE="World". 
+ */
+int expand(char* orig, char* new, int newsize);
+
+
 /* Main entry point.
  * argc    A count of command-line arguments 
  * argv    The com mand-line argument valus
@@ -53,7 +59,11 @@ int main(int argc, const char* argv[]) {
   rule*   rhead    = NULL;
   int     argcp    = 0;
   char**  argsp    = NULL;
-  linelen = getline(&line, &bufsize, makefile);
+  if (makefile == NULL){
+    fprintf(stderr, "uMakefile does not exist in this directory");
+    exit(1);
+  }
+  int linelen = getline(&line, &bufsize, makefile);
 
   while(-1 != linelen) {
 
@@ -66,7 +76,7 @@ int main(int argc, const char* argv[]) {
     }
     else{
       if (rhead != NULL){
-        nhead = list_target_depend(argcp, argsp, rhead, nhead);
+	nhead = list_target_depend(argcp, argsp, rhead, nhead);
 	rhead = NULL;
       }
       char** args = arg_parse(line, &argcp);
@@ -96,7 +106,24 @@ int main(int argc, const char* argv[]) {
  */
 void processline (char* line) {
   int argcp = 0;
-  char** args = arg_parse(line, &argcp);
+  char** args;
+  if(strchr(line, 36) != NULL){
+    char new[1024];
+    if(expand(line, new, 1024) < 0){
+      fprintf(stderr, "expand");
+    }
+    args = arg_parse(new, &argcp);
+    if (argcp == 1){
+      free (args);
+      return;
+    }
+  }else{
+    args = arg_parse(line, &argcp);
+    if (argcp == 1){
+      free (args);
+      return;
+    }
+  }
   const pid_t cpid = fork();
   switch(cpid) {
     
@@ -107,7 +134,6 @@ void processline (char* line) {
   }
     
   case 0: {
-    
     execvp(args[0], args);
     perror("execvp");
     exit(EXIT_FAILURE);
@@ -130,7 +156,7 @@ void processline (char* line) {
   }
 }
 
-void handleTargets(int argc, const char** argv, node* nhead){  
+void handleTargets(int argc, const char** argv, node* nhead){
   for(int i = 1; i < argc; i++){
     rule* iter = list_search(nhead, argv[i]);
     while(iter->next != NULL){
@@ -138,5 +164,78 @@ void handleTargets(int argc, const char** argv, node* nhead){
       iter = iter->next;
     }
     processline(&iter->rule[1]);
+  }
+}
+
+
+
+int expand(char* orig, char* new, int newsize){
+  char* origp = orig;
+  int origi = 0;
+  int newi = 0;
+  int dol = 0;
+  int envstart;
+  int end;
+  int linelen = strlen(orig);
+  while(origi < linelen && newi < newsize-1){
+    switch (origp[origi]){
+      
+    case '$': {
+	if(origp[origi+1] == '{'){
+	  dol++;
+	  envstart = origi+2;
+	  origi += 2;
+	}
+	break;
+    }
+
+    case '}': {
+	if (dol > 0){
+	  dol--;
+	  int length = origi-envstart;
+	  char* env = malloc(sizeof(char)*(length+1));
+	  for (int j = 0; j < length; j++){
+	    env[j] = origp[envstart];
+	    envstart++;
+	  }
+	  env[length] = '\0';
+	  char* var = getenv(env);
+	  free(env);
+	  while(*var!='\0' && newi < newsize){
+	    new[newi] = *var;
+	    newi++;
+	    var++;
+	  }
+	  if(*var!='\0' && newi == newsize){
+	    fprintf(stderr, "Not enough room to expand");
+	    return -1;
+	  }
+	}else{
+	  new[newi] = origp[origi];
+	  newi++;
+	}
+	origi++;
+	break;
+    }
+      
+    default:{
+      if (dol == 0){
+	new[newi] = origp[origi];
+	origi++;
+	newi++;
+      }else{
+	origi++;
+      }
+      break;
+    }
+      
+  }
+
+  }
+  if (dol > 0){
+    fprintf(stderr, "expected }");
+    return -1;
+  }else{
+    return 0;
   }
 }
