@@ -17,4 +17,4 @@ install:
 	cp -p umake ${HOME}/bin/umake
 
 who:
-	echo The user is {${USER}}.
+	echo ${USER}The user is ${USER}.

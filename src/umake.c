@@ -236,6 +236,7 @@ int expand(char* orig, char* new, int newsize){
     fprintf(stderr, "expected }");
     return -1;
   }else{
+    new[newi] = '\0';
     return 0;
   }
 }
