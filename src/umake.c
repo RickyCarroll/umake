@@ -22,11 +22,13 @@
 void   processline(char* line);
 
 /* Handle Targets
+ * target - string containing the target
  * nhead - head of the node list
  * This function finds the targets in the list and sends their rules to processline
+ * Allows for recursive calls based on dependencies
  */
 
-void handleTargets(char* argv, node* nhead);
+void handleTargets(char* target, node* nhead);
 
 /* Expand
  * orig    The input string that may contain variables to be expanded
@@ -166,6 +168,11 @@ void processline (char* line) {
   }
 }
 
+/* Handle Targets
+ * target - string containing target
+ * nhead - head of the node list
+ */
+
 void handleTargets(char* target, node* nhead){
     node* node = list_search(nhead, target);
     if (node != NULL){
@@ -185,7 +192,11 @@ void handleTargets(char* target, node* nhead){
 }
 
 
-
+/* Expand
+ * orig - original line
+ * new - new line with all variables expanded
+ * newsize - size of new array
+ */
 int expand(char* orig, char* new, int newsize){
   char* origp = orig;
   int origi = 0;
