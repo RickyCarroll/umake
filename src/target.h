@@ -48,7 +48,11 @@ rule* list_rule(char* line, int linelen, rule* head);
 /* List Search
  * searches list of nodes for targname
  */
-rule* list_search(node* head, const char* targname);
+node* list_search(node* head, const char* targname);
+
+void list_free_node(node* node);
+
+void list_free_rule(rule* rule);
 
 
 #define EMPTY NULL;

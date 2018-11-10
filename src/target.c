@@ -47,8 +47,8 @@ node* list_create_node(int argcp, char** args, rule* head){
   temp->target = strdup(args[0]);
   temp->dependencies = malloc(sizeof(char*)*(argcp-1));
   for (int i = 1; i < argcp-1; i++){
-    temp->dependencies[i] = malloc(sizeof(char)*(strlen(args[i])+1));
-    temp->dependencies[i] = strdup(args[i]);
+    temp->dependencies[i-1] = malloc(sizeof(char)*(strlen(args[i])));
+    temp->dependencies[i-1] = strdup(args[i]);
   }
   temp->rules = (rule*)malloc(sizeof(rule));
   temp->rules = head;
@@ -59,7 +59,7 @@ rule* list_create_rule(char* line, int linelen){
   rule* temp =(rule*)malloc(sizeof(rule));
   temp->next = NULL;
   temp->rule = malloc(sizeof(char)*linelen);
-  strcpy(temp->rule, line);
+  temp->rule = strdup(line);
   return temp;
 }
 
@@ -92,7 +92,7 @@ rule* list_rule(char* line, int linelen, rule* head){
       return head;
 }
 
-rule* list_search(node* head, const char* targname){
+node* list_search(node* head, const char* targname){
   if (head == NULL){
     return NULL;
   }
@@ -102,9 +102,34 @@ rule* list_search(node* head, const char* targname){
       iter = iter->next;
     }
     if (strcmp(iter->target, targname) == 0){
-      return iter->rules;
+      return iter;
     }
   }
-  fprintf(stderr, "target: %s does not exist\n", targname);
-  exit(0);
+  return NULL;
+}
+
+void list_free_node(node* node){
+  if(node->next != NULL){
+    list_free_node(node->next);
+  }else{
+    return;
+  }
+  list_free_rule(node->rules);
+  free(node->rules);
+  free(node->target);
+  for(int i = 0; node->dependencies[i] != NULL; i++){
+    free(node->dependencies[i]);
+  }
+  free(node->dependencies);
+  free(node->next);
+}
+
+void list_free_rule(rule* rule){
+  if(rule->next != NULL){
+    list_free_rule(rule->next);
+  }else{
+    return;
+  }
+  free(rule->rule);
+  free(rule->next);
 }

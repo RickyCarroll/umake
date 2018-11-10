@@ -26,7 +26,7 @@ void   processline(char* line);
  * This function finds the targets in the list and sends their rules to processline
  */
 
-void handleTargets(int argc, const char** argv, node* nhead);
+void handleTargets(char* argv, node* nhead);
 
 /* Expand
  * orig    The input string that may contain variables to be expanded
@@ -71,8 +71,15 @@ int main(int argc, const char* argv[]) {
       linelen -= 1;
       line[linelen] = '\0';
     }
+    
     if(line[0] == '\t') {
       rhead = list_rule(line, linelen, rhead);
+    }
+    else if(strchr(line, 61) != NULL){
+      char** args = arg_parse(line, &argcp);
+      if (argcp > 2){
+	setenv(args[0], args[2], 1);
+      }
     }
     else{
       if (rhead != NULL){
@@ -80,9 +87,9 @@ int main(int argc, const char* argv[]) {
 	rhead = NULL;
       }
       char** args = arg_parse(line, &argcp);
-      argsp = malloc(sizeof(char)*argcp);
+      argsp = malloc(sizeof(char*)*argcp);
       for (int i=0; i<argcp-1; i++){
-	argsp[i] = malloc(sizeof(strlen(args[i])));
+	argsp[i] = malloc(sizeof(char)*strlen(args[i]));
 	argsp[i] = strdup(args[i]);
       }
     }
@@ -93,9 +100,12 @@ int main(int argc, const char* argv[]) {
   nhead = list_target_depend(argcp, argsp, rhead, nhead);
   rhead = NULL;
   
-  handleTargets(argc, argv, nhead);
-  
+  for(int i = 1; i < argc; i++){
+    handleTargets(argv[i], nhead);
+  }
   free(line);
+  list_free_node(nhead);
+  free(nhead);
   return EXIT_SUCCESS;
 }
 
@@ -156,15 +166,22 @@ void processline (char* line) {
   }
 }
 
-void handleTargets(int argc, const char** argv, node* nhead){
-  for(int i = 1; i < argc; i++){
-    rule* iter = list_search(nhead, argv[i]);
-    while(iter->next != NULL){
-      processline(&iter->rule[1]);
-      iter = iter->next;
+void handleTargets(char* target, node* nhead){
+    node* node = list_search(nhead, target);
+    if (node != NULL){
+      for(int j = 0; node->dependencies[j] != NULL; j++){
+	handleTargets(node->dependencies[j], nhead);
+      }
+    }else{
+      return;
     }
-    processline(&iter->rule[1]);
-  }
+    rule* rule = node->rules;
+    while(rule->next != NULL){
+      char* curline = strdup(&rule->rule[1]);
+      processline(curline);
+      rule = rule->next;
+    }
+    processline(&rule->rule[1]);
 }
 
 
@@ -200,16 +217,23 @@ int expand(char* orig, char* new, int newsize){
 	  }
 	  env[length] = '\0';
 	  char* var = getenv(env);
-	  free(env);
-	  while(*var!='\0' && newi < newsize){
-	    new[newi] = *var;
-	    newi++;
-	    var++;
+
+	  if(var!=NULL){
+	    free(env);
+	    while(*var!='\0' && newi < newsize){
+	      new[newi] = *var;
+	      newi++;
+	      var++;
+	    }
+	    if(*var!='\0' && newi == newsize){
+	      fprintf(stderr, "Not enough room to expand");
+	      return -1;
+	    }
+	  }else{
+	    printf("%s not found\n", env);
+	    free(env);
 	  }
-	  if(*var!='\0' && newi == newsize){
-	    fprintf(stderr, "Not enough room to expand");
-	    return -1;
-	  }
+	  
 	}else{
 	  new[newi] = origp[origi];
 	  newi++;

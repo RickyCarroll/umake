@@ -1,14 +1,22 @@
+CC = gcc
+flags = -g -c
+
+
 umake: umake.o arg_parse.o target.o
 	gcc -g -Wall -o umake umake.o arg_parse.o target.o
+	echo Done with umake
 
 arg_parse.o: arg_parse.c arg_parse.h
-	gcc -g -c arg_parse.c
+	${CC} ${flags} arg_parse.c
+	echo Done with arg_parse.o
 
 umake.o: umake.c arg_parse.h target.h
-	gcc -g -c umake.c
+	${CC} ${flags} umake.c
+	echo Done with umake.o
 
 target.o: target.c target.h
-	gcc -g -c target.c
+	${CC} ${flags} target.c
+	echo Done with target.o
 
 clean:
 	rm *.o *~ umake
@@ -17,4 +25,4 @@ install:
 	cp -p umake ${HOME}/bin/umake
 
 who:
-	echo ${USER}The user is ${USER}.
+	echo ${USER} blah blah The user is ${USER}.
