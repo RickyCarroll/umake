@@ -62,7 +62,7 @@ int main(int argc, const char* argv[]) {
   int     argcp    = 0;
   char**  argsp    = NULL;
   if (makefile == NULL){
-    fprintf(stderr, "uMakefile does not exist in this directory");
+    fprintf(stderr, "uMakefile does not exist in this directory\n");
     exit(1);
   }
   int linelen = getline(&line, &bufsize, makefile);

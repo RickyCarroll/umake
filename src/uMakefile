@@ -7,7 +7,7 @@ umake: umake.o arg_parse.o target.o
 	echo Done with umake
 
 arg_parse.o: arg_parse.c arg_parse.h
-	${CC} ${flags} arg_parse.c
+	${CC} ${flags} arg_parse.c #compile arg_parse.o
 	echo Done with arg_parse.o
 
 umake.o: umake.c arg_parse.h target.h
@@ -25,4 +25,4 @@ install:
 	cp -p umake ${HOME}/bin/umake
 
 who:
-	echo ${USER} blah blah The user is ${USER}.
+	echo The user is ${USER}.
