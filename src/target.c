@@ -1,4 +1,5 @@
 #include "target.h"
+#include "umake.h"
 
 
 /* List Append
@@ -45,14 +46,12 @@ rule* list_append_rule(rule* head, rule* temp){
 node* list_create_node(int argcp, char** args, rule* head){
   node* temp = (node*)malloc(sizeof(node));
   temp->next = NULL;
-  temp->target = malloc(sizeof(char)*(strlen(args[0])+1));
   if (args[0][strlen(args[0])-1] == ':'){
     args[0][strlen(args[0])-1] = '\0';
   }
   temp->target = strdup(args[0]);
   temp->dependencies = malloc(sizeof(char*)*(argcp-1));
   for (int i = 1; i < argcp-1; i++){
-    temp->dependencies[i-1] = malloc(sizeof(char)*(strlen(args[i])));
     temp->dependencies[i-1] = strdup(args[i]);
   }
   temp->rules = (rule*)malloc(sizeof(rule));
@@ -67,7 +66,6 @@ node* list_create_node(int argcp, char** args, rule* head){
 rule* list_create_rule(char* line, int linelen){
   rule* temp =(rule*)malloc(sizeof(rule));
   temp->next = NULL;
-  temp->rule = malloc(sizeof(char)*linelen);
   temp->rule = strdup(line);
   return temp;
 }
@@ -166,4 +164,13 @@ void list_free_rule(rule* rule){
   }
   free(rule->rule);
   free(rule->next);
+}
+
+void process_rules(rule* rule){
+  while(rule->next != NULL){
+    char* curline = strdup(&rule->rule[1]);
+    processline(curline);
+    rule = rule->next;
+  }
+  processline(&rule->rule[1]);
 }

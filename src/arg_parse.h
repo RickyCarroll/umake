@@ -5,6 +5,9 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
 
 /* Arg parse
  * line   The command line to process

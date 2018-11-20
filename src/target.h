@@ -66,7 +66,10 @@ void list_free_node(node* node);
  * frees all rule structs in list recursively
  */
 void list_free_rule(rule* rule);
-
+/*
+ *
+ */
+void process_rules(rule* rules);
 
 #define EMPTY NULL;
 
