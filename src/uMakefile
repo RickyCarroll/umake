@@ -18,10 +18,17 @@ target.o: target.c target.h umake.h
 	echo Done with target.o
 
 clean:
-	rm umake.o arg_parse.o target.o umake
+	rm umake.o arg_parse.o target.o umake log files line_count
 
 install:
 	cp -p umake ${HOME}/bin/umake
 
 who:
 	echo The user is ${USER}.
+
+work:
+	date >> log
+	ls -a > files
+	wc -l < files
+	wc -l < files > line_count
+	echo Done with work

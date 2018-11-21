@@ -109,6 +109,7 @@ void processline (char* line) {
   }
     
   case 0: {
+    redirect(args);
     execvp(args[0], args);
     perror("execvp");
     exit(EXIT_FAILURE);
@@ -204,7 +205,6 @@ int expand(char* orig, char* new, int newsize){
 	  }
 	  env[length] = '\0';
 	  char* var = getenv(env);
-
 	  if(var!=NULL){
 	    free(env);
 	    while(*var!='\0' && newi < newsize){
@@ -219,8 +219,7 @@ int expand(char* orig, char* new, int newsize){
 	  }else{
 	    printf("%s not found\n", env);
 	    free(env);
-	  }
-	  
+	  }	  
 	}else{
 	  new[newi] = origp[origi];
 	  newi++;
@@ -238,10 +237,8 @@ int expand(char* orig, char* new, int newsize){
 	origi++;
       }
       break;
-    }
-      
+    }   
   }
-
   }
   if (dol > 0){
     fprintf(stderr, "expected }");
@@ -249,5 +246,54 @@ int expand(char* orig, char* new, int newsize){
   }else{
     new[newi] = '\0';
     return 0;
+  }
+}
+
+/* Redirect
+ * line - current line to be executed
+ */
+
+void redirect (char** line){
+  int fd;
+  int ix;
+  while(line[ix] != NULL){
+    switch(*line[ix]){
+    case '<':
+      line[ix] = NULL;
+      ix++;
+      fd = open(line[ix], O_CREAT | O_RDONLY, 0600);
+      if(fd < 0){
+	perror("open:");
+      }
+      dup2(fd, 0);
+      close(fd);
+      line[ix] = NULL;
+      break;
+
+    case '>':
+      if (line[ix][1] == '>'){
+	line[ix] = NULL;
+        ix++;
+	fd = open(line[ix], O_APPEND | O_WRONLY | O_CREAT, 0600);
+	if(fd < 0){
+	  perror("open:");
+	}
+	dup2(fd, 1);
+	close(fd);
+	line[ix] = NULL;
+      }else{
+	line[ix] = NULL;
+        ix++;
+	fd = open(line[ix], O_CREAT | O_WRONLY | O_TRUNC, 0600);
+	if(fd < 0){
+	  perror("open:");
+	}
+	dup2(fd, 1);
+	close(fd);
+	line[ix] = NULL;
+      }
+      break;
+    }
+    ix++;
   }
 }

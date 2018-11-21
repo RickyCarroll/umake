@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include "arg_parse.h"
 #include "target.h"
 /* CONSTANTS */
@@ -28,10 +29,15 @@ void handleTargets(char* target, node* nhead);
  * orig    The input string that may contain variables to be expanded
  * new     An output buffer that will contain a copy of orig with all 
  *         variables expanded
- * newsize The size of the buffer pointed to by new.
  * returns 1 upon success or 0 upon failure. 
  *
  * Example: "Hello, ${PLACE}" will expand to "Hello, World" when the environment
  * variable PLACE="World". 
  */
 int expand(char* orig, char* new, int newsize);
+
+/* Redirect
+ * line    The current line to be executed as a new process
+ * returns a modified line with I/O redirection
+ */
+void redirect(char** line);
